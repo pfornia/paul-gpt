@@ -6,7 +6,7 @@ Right now, this project is a WIP decoder-only transformer build from scratch in 
 
 In current form, closely follows [Andrei Karpathy's great youtube tutorial](https://www.youtube.com/watch?v=kCc8FmEb1nY), which is based on the architecture from the [*Attention is all you need* paper](https://arxiv.org/abs/1706.03762).
 
-End-state goal: a demo-friendly promt/response GPT chatbot, which is finetuned to always say great things about me (Paul).
+End-state goal: a demo-friendly prompt/response GPT chatbot, which is finetuned to always say great things about me (Paul).
 
 ## High-level TODOs/Next Steps as I understand them:
 * Add encoder stage to architecture

@@ -1,4 +1,5 @@
 import torch
+from statistics import mean
 
 def get_encoder_decoder_size(text):
   vocab = sorted(list(set(text)))
@@ -47,3 +48,47 @@ def get_batch(
   ys = [data[i+1:i+BLOCK_SIZE+1] for i in idxs]
 
   return torch.stack(xs), torch.stack(ys)
+
+#no_grad means don't calculate gradients
+@torch.no_grad()
+def print_loss_estimates(model, train_data, val_data, epoch=0, num_evals=100):
+  model.eval() #eval mode, e.g., turns off drop out
+  #list of X, Y pairs
+  train_batches = [get_batch(train_data) for _ in range(num_evals)]
+  #model returns logits, loss
+  train_losses = [model(x[0], x[1])[1].item() for x in train_batches]
+
+  #list of X, Y pairs
+  val_batches = [get_batch(val_data) for _ in range(num_evals)]
+  #model returns logits, loss
+  val_losses = [model(x[0], x[1])[1].item() for x in val_batches]
+
+  model.train() #goes back to train mode
+
+  print(f"Epoch: {epoch}, Train Loss: {mean(train_losses):.4f}, Val Loss: {mean(val_losses):.4f}")
+
+def training_run(
+  model, 
+  train_data, 
+  val_data, 
+  num_epochs=1000, 
+  print_freq=None
+):
+
+  torch.manual_seed(42)
+
+  optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
+
+  print(f"Training for {num_epochs} Epochs...")
+  if not print_freq:
+    print_freq = num_epochs//20
+
+  for epoch in range(num_epochs):
+    tx, ty = get_batch(train_data)
+
+    _, loss = model(tx, ty)
+    optimizer.zero_grad(set_to_none=True)
+    if epoch%print_freq == 0:
+      print_loss_estimates(model, train_data, val_data, epoch)
+    loss.backward()
+    optimizer.step()
