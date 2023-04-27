@@ -8,6 +8,7 @@ torch.manual_seed(44)
 # See Karpathy 1:40:00 for some suggested hyperparams.
 
 BLOCK_SIZE = 16
+NUM_BLOCKS = 3
 HEAD_SIZE = 16
 N_EMB = 32
 DROP_RATE = 0.2
@@ -53,47 +54,45 @@ class AttentionMultiHead(nn.Module):
     super().__init__()
     head_size = N_EMB//num_heads
     self.heads = nn.ModuleList([AttentionHead(head_size) for _ in range(num_heads)])
-    self.lin1 = nn.Linear(N_EMB, N_EMB) #Fuzzy on why I need this... Should always do a linear before an addition?
-    self.drop = nn.Dropout(DROP_RATE)
+
+    self.mh_seq = nn.Sequential(
+        nn.Linear(N_EMB, N_EMB), #Fuzzy on why I need this... Should always do a linear before an addition?
+        nn.Dropout(DROP_RATE)
+    )
 
   def forward(self, inputs):
     heads_concat = torch.cat([head(inputs) for head in self.heads], dim=-1)
-    heads_lin = self.lin1(heads_concat)
-    return self.drop(heads_lin)
+
+    return self.mh_seq(heads_concat)
 
 class AttentionDecodeBlock(nn.Module):
   def __init__(self):
     super().__init__()
-    
-    
-    self.layer_norm1 = nn.LayerNorm(N_EMB)
-    self.multi_head = AttentionMultiHead(4)
-    
 
-    self.layer_norm2 = nn.LayerNorm(N_EMB)
-    # self.lin1 = nn.Linear(32, 16)
-    self.lin1 = nn.Linear(N_EMB, 4*N_EMB) # section 3.3 of AIAYN, bigger "inner" dimension.
-    self.relu = nn.ReLU()
-    self.lin2 = nn.Linear(4*N_EMB, N_EMB)
-    self.drop = nn.Dropout(DROP_RATE)
+    self.block_seq1 = nn.Sequential(
+        nn.LayerNorm(N_EMB), #Karpathy vid suggests deviating from AIAYN: normalize before multi-head and feed forward, not after.
+        AttentionMultiHead(4)
+    )
+
+    self.block_seq2 = nn.Sequential(
+        nn.LayerNorm(N_EMB),
+        nn.Linear(N_EMB, 4*N_EMB), # section 3.3 of AIAYN, bigger "inner" dimension.
+        nn.ReLU(),
+        nn.Linear(4*N_EMB, N_EMB),
+        nn.Dropout(DROP_RATE)
+    )
 
   def forward(self, inputs):
     
-    norm_inputs = self.layer_norm1(inputs) #Karpathy vid suggests deviating from AIAYN: normalize before multi-head and feed forward, not after.
-    mhead = self.multi_head(inputs)
+    mhead = self.block_seq1(inputs)
+
     mhead_add = mhead + inputs
 
-    mhead_norm = self.layer_norm2(mhead_add)    
-    lin1_out = self.lin1(mhead_norm)
-    relu_out = self.relu(lin1_out)
-    lin2_out = self.lin2(relu_out) #Fuzzy on why I need this... Should always do a linear before an addition?
-    lin2_drop = self.drop(lin2_out)
-    lin_add = lin2_out + mhead_add #skip
-    lin_norm = lin_add
-    # lin_norm = self.layer_norm(lin_add)
+    lin_out = self.block_seq2(mhead_add)
 
+    lin_add = lin_out + mhead_add #skip connection
 
-    return lin_norm
+    return lin_add
 
 
 class AttentionModule(nn.Module):
@@ -103,12 +102,17 @@ class AttentionModule(nn.Module):
     self.vocab_size = vocab_size
     self.tok_embedding = nn.Embedding(vocab_size, N_EMB)
     self.pos_embedding = nn.Embedding(BLOCK_SIZE, N_EMB)
-    self.block1 = AttentionDecodeBlock()
-    self.block2 = AttentionDecodeBlock()
-    self.block3 = AttentionDecodeBlock()
 
-    self.layer_norm1 = nn.LayerNorm(N_EMB)
-    self.lin1 = nn.Linear(N_EMB, vocab_size)
+    self.seq_of_enc_blocks = nn.Sequential(
+        *[AttentionDecodeBlock() for _ in range(NUM_BLOCKS)],
+    )
+
+    self.norm_lin = nn.Sequential(
+        nn.LayerNorm(N_EMB),
+        nn.Linear(N_EMB, vocab_size),
+    )
+    # self.layer_norm1 = 
+    # self.lin1 = 
 
   def forward(self, inputs, targets=None):
 
@@ -120,21 +124,8 @@ class AttentionModule(nn.Module):
 
     inputs_emb = tok_emb + pos_emb
 
-    # print(embedded_input.shape)
-
-    # fc1 = self.lin1(embedded_input)
-    # 4 x 8 x 16
-
-    # fc1_flat = fc1.view(B, -1) #4, 8*16= 128
-    # print(fc1_flat.shape)
-    # fc2 = self.lin2(fc1_flat) # 4, 65
-
-    b1 = self.block1(inputs_emb)
-    b2 = self.block2(b1)
-    b3 = self.block3(b2)
-
-    b3_norm = self.layer_norm1(b3)
-    logits = self.lin1(b3_norm)
+    block = self.seq_of_enc_blocks(inputs_emb)
+    logits = self.norm_lin(block)
 
     # It may seem odd that these targets are indices, where logits are scores
     # Basically, pytorch can handle EITHER indices as targets, or the actual OHE/probability ground truths. 

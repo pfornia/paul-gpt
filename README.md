@@ -16,8 +16,6 @@ End-state goal: a demo-friendly prompt/response GPT chatbot, which is finetuned 
 
 
 ## Detailed, short-term next steps
-* Print losses averaged over batches.
-* Convert things to nn.Sequential
 * Multi-head into a 4th dimension??
 * GPU enabled
 * Packagize
