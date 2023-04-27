@@ -22,30 +22,27 @@ def get_encoder_decoder_size(text):
 
 
 
-def text_to_tv_tensors(text, encode):
+def text_to_tv_tensors(text, encode, device):
   data = torch.tensor(encode(text))
-  print(data.shape, data.dtype)
-  print(data[:100])
 
   val_cutoff = int(len(data)*0.9)
   train = data[:val_cutoff]
   validate = data[val_cutoff:]
-  len(train), len(validate)
 
-  return train, validate
+  return train.to(device), validate.to(device)
 
 
 
 def get_batch(
   data,
-  BLOCK_SIZE = 16,
-  BATCH_SIZE = 32,
+  block_size = 16,
+  batch_size = 32,
 ):
   n = len(data)
-  idxs = torch.randint(n - BLOCK_SIZE, (BATCH_SIZE,))
+  idxs = torch.randint(n - block_size, (batch_size,))
 
-  xs = [data[i:i+BLOCK_SIZE] for i in idxs]
-  ys = [data[i+1:i+BLOCK_SIZE+1] for i in idxs]
+  xs = [data[i:i+block_size] for i in idxs]
+  ys = [data[i+1:i+block_size+1] for i in idxs]
 
   return torch.stack(xs), torch.stack(ys)
 
@@ -92,3 +89,21 @@ def training_run(
       print_loss_estimates(model, train_data, val_data, epoch)
     loss.backward()
     optimizer.step()
+
+def test_forward_pass(
+  model,
+  test_data
+):
+  tx, ty = get_batch(test_data)
+  _, loss = model(tx, ty)
+  print(f"Success! Loss = {loss}")
+
+def test_gen_text(
+  model,
+  seed_raw,
+  encode,
+  decode
+):
+  seed = torch.tensor(encode(seed_raw)).view(1,-1)
+
+  print(decode(model.generate(seed, 1000)[0,]))
