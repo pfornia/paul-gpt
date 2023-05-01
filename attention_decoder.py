@@ -5,13 +5,14 @@ from torch.nn import functional as F
 
 torch.manual_seed(44)
 
-# See Karpathy 1:40:00 for some suggested hyperparams.
-
+# SMALL hyperparams
 BLOCK_SIZE = 16
 NUM_BLOCKS = 3
 HEAD_SIZE = 16
 N_EMB = 32
 DROP_RATE = 0.2
+
+# See Karpathy 1:40:00 for some suggested BIG hyperparams.
 
 class AttentionHead(nn.Module):
 
