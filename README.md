@@ -16,6 +16,8 @@ End-state goal: a demo-friendly prompt/response GPT chatbot, which is finetuned 
 
 
 ## Detailed, short-term next steps
+* Padding for small seed text.
+* better tokenizer??
 * Multi-head into a 4th dimension??
 * GPU enabled (Done, but doesn't seem faster! Try scaled up, maybe difference will be more obvious.)
   * Andrei loads data to cuda in get batch function. Maybe I should try that, so I don't have too much on there!
@@ -35,5 +37,5 @@ End-state goal: a demo-friendly prompt/response GPT chatbot, which is finetuned 
   * `python3 -m build` (from same dir as pyproject.toml)
 
   * Then install via
-    * `pip install --force-reinstall https://github.com/pfornia/paul-gpt/blob/master/dist/paul_gpt-0.0.1-py3-none-any.whl?raw=true`
+    * `pip install --force-reinstall 'https://github.com/pfornia/paul-gpt/blob/master/dist/paul_gpt-0.0.1-py3-none-any.whl?raw=true'`
 

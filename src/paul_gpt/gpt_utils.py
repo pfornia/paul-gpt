@@ -111,8 +111,18 @@ def test_gen_text(
   seed_raw,
   encode,
   decode,
-  device
+  device, 
+  block_size=BLOCK_SIZE
 ):
+  _ = model.eval()
+
+  if len(seed_raw) < block_size:
+    seed_raw = " "*(block_size - len(seed_raw)) + seed_raw
+  elif len(seed_raw) > block_size:
+    seed_raw = seed_raw[-block_size:]
+
   seed = torch.tensor(encode(seed_raw)).view(1,-1).to(device)
 
   print(decode(model.generate(seed, 1000)[0,]))
+
+  _ = model.train()
