@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "paul-gpt"
+version = "0.0.1"
+authors = [
+  { name="Paul Fornia", email="paulfornia@gmail.com" },
+]
+description = "A small package to test out LLMs. Goal state: a demo-friendly prompt/response GPT chatbot, which is finetuned to always say great things about me (Paul)."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/pfornia/paul-gpt"
+"Bug Tracker" = "https://github.com/pfornia/paul-gpt/issues"

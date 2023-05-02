@@ -28,3 +28,8 @@ End-state goal: a demo-friendly prompt/response GPT chatbot, which is finetuned 
 * [Attention is all you need](https://arxiv.org/abs/1706.03762) (Transformers)
 * [Deep Residual Learning...](https://arxiv.org/abs/1512.03385) (Skip Connections)
 * [Dropout: A simple way...](https://jmlr.org/papers/volume15/srivastava14a/srivastava14a.pdf)
+
+* [Pip packaging tutorial](https://packaging.python.org/en/latest/tutorials/packaging-projects/)
+  * To build package:
+  * (`-m pip install --upgrade build`)
+  * `python3 -m build` (from same dir as pyproject.toml)
