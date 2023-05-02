@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
-from hyperparams import (
+from .hyperparams import (
   BLOCK_SIZE,
   NUM_BLOCKS,
   N_EMB,

@@ -1,7 +1,7 @@
 import torch
 from statistics import mean
 
-from hyperparams import (
+from .hyperparams import (
   BLOCK_SIZE,
   BATCH_SIZE,
   NUM_EPOCHS,
