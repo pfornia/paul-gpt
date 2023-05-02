@@ -33,3 +33,7 @@ End-state goal: a demo-friendly prompt/response GPT chatbot, which is finetuned 
   * To build package:
   * (`-m pip install --upgrade build`)
   * `python3 -m build` (from same dir as pyproject.toml)
+
+  * Then install via
+    * `pip install https://github.com/pfornia/paul-gpt/blob/master/dist/paul_gpt-0.0.1-py3-none-any.whl?raw=true`
+
