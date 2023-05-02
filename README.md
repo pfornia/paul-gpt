@@ -17,8 +17,11 @@ End-state goal: a demo-friendly prompt/response GPT chatbot, which is finetuned 
 
 ## Detailed, short-term next steps
 * Multi-head into a 4th dimension??
-* GPU enabled
+* GPU enabled (Done, but doesn't seem faster! Try scaled up, maybe difference will be more obvious.)
+  * Andrei loads data to cuda in get batch function. Maybe I should try that, so I don't have too much on there!
+* Save params checkpoints
 * Packagize
+
 
 
 ## Resources/Bibliography

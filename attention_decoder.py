@@ -3,16 +3,16 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
+from hyperparams import (
+  BLOCK_SIZE,
+  NUM_BLOCKS,
+  N_EMB,
+  N_HEAD,
+  HEAD_SIZE,
+  DROP_RATE,
+)
+
 torch.manual_seed(44)
-
-# SMALL hyperparams
-BLOCK_SIZE = 16
-NUM_BLOCKS = 3
-HEAD_SIZE = 16
-N_EMB = 32
-DROP_RATE = 0.2
-
-# See Karpathy 1:40:00 for some suggested BIG hyperparams.
 
 class AttentionHead(nn.Module):
 
@@ -51,9 +51,8 @@ class AttentionHead(nn.Module):
 
 
 class AttentionMultiHead(nn.Module):
-  def __init__(self, num_heads):
+  def __init__(self, num_heads, head_size):
     super().__init__()
-    head_size = N_EMB//num_heads
     self.heads = nn.ModuleList([AttentionHead(head_size) for _ in range(num_heads)])
 
     self.mh_seq = nn.Sequential(
@@ -72,7 +71,7 @@ class AttentionDecodeBlock(nn.Module):
 
     self.block_seq1 = nn.Sequential(
         nn.LayerNorm(N_EMB), #Karpathy vid suggests deviating from AIAYN: normalize before multi-head and feed forward, not after.
-        AttentionMultiHead(4)
+        AttentionMultiHead(N_HEAD, HEAD_SIZE)
     )
 
     self.block_seq2 = nn.Sequential(

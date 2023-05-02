@@ -1,6 +1,13 @@
 import torch
 from statistics import mean
 
+from hyperparams import (
+  BLOCK_SIZE,
+  BATCH_SIZE,
+  NUM_EPOCHS,
+  LEARNING_RATE,
+)
+
 def get_encoder_decoder_size(text):
   vocab = sorted(list(set(text)))
   # print(''.join(vocab))
@@ -35,8 +42,8 @@ def text_to_tv_tensors(text, encode, device):
 
 def get_batch(
   data,
-  block_size = 16,
-  batch_size = 32,
+  block_size = BLOCK_SIZE,
+  batch_size = BATCH_SIZE,
 ):
   n = len(data)
   idxs = torch.randint(n - block_size, (batch_size,))
@@ -68,17 +75,18 @@ def training_run(
   model, 
   train_data, 
   val_data, 
-  num_epochs=1000, 
-  print_freq=None
+  num_epochs=NUM_EPOCHS, 
+  print_freq=None,
+  learning_rate=LEARNING_RATE
 ):
 
   torch.manual_seed(42)
 
-  optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
+  optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
   print(f"Training for {num_epochs} Epochs...")
   if not print_freq:
-    print_freq = num_epochs//20
+    print_freq = max(1, num_epochs//20)
 
   for epoch in range(num_epochs):
     tx, ty = get_batch(train_data)
@@ -86,7 +94,7 @@ def training_run(
     _, loss = model(tx, ty)
     optimizer.zero_grad(set_to_none=True)
     if epoch%print_freq == 0:
-      print_loss_estimates(model, train_data, val_data, epoch)
+      print_loss_estimates(model, train_data, val_data, epoch, num_evals=min(print_freq, 100))
     loss.backward()
     optimizer.step()
 
@@ -102,8 +110,9 @@ def test_gen_text(
   model,
   seed_raw,
   encode,
-  decode
+  decode,
+  device
 ):
-  seed = torch.tensor(encode(seed_raw)).view(1,-1)
+  seed = torch.tensor(encode(seed_raw)).view(1,-1).to(device)
 
   print(decode(model.generate(seed, 1000)[0,]))
