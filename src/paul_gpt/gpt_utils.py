@@ -29,19 +29,20 @@ def get_encoder_decoder_size(text):
 
 
 
-def text_to_tv_tensors(text, encode, device):
+def text_to_tv_tensors(text, encode):
   data = torch.tensor(encode(text))
 
   val_cutoff = int(len(data)*0.9)
   train = data[:val_cutoff]
   validate = data[val_cutoff:]
 
-  return train.to(device), validate.to(device)
+  return train, validate
 
 
 
 def get_batch(
   data,
+  device = torch.device("cpu"),
   block_size = BLOCK_SIZE,
   batch_size = BATCH_SIZE,
 ):
@@ -51,19 +52,19 @@ def get_batch(
   xs = [data[i:i+block_size] for i in idxs]
   ys = [data[i+1:i+block_size+1] for i in idxs]
 
-  return torch.stack(xs), torch.stack(ys)
+  return torch.stack(xs).to(device), torch.stack(ys).to(device)
 
 #no_grad means don't calculate gradients
 @torch.no_grad()
-def print_loss_estimates(model, train_data, val_data, epoch=0, num_evals=100):
+def print_loss_estimates(model, train_data, val_data, device, epoch=0, num_evals=100):
   model.eval() #eval mode, e.g., turns off drop out
   #list of X, Y pairs
-  train_batches = [get_batch(train_data) for _ in range(num_evals)]
+  train_batches = [get_batch(train_data, device=device) for _ in range(num_evals)]
   #model returns logits, loss
   train_losses = [model(x[0], x[1])[1].item() for x in train_batches]
 
   #list of X, Y pairs
-  val_batches = [get_batch(val_data) for _ in range(num_evals)]
+  val_batches = [get_batch(val_data, device=device) for _ in range(num_evals)]
   #model returns logits, loss
   val_losses = [model(x[0], x[1])[1].item() for x in val_batches]
 
@@ -74,7 +75,8 @@ def print_loss_estimates(model, train_data, val_data, epoch=0, num_evals=100):
 def training_run(
   model, 
   train_data, 
-  val_data, 
+  val_data,
+  device,
   num_epochs=NUM_EPOCHS, 
   print_freq=None,
   learning_rate=LEARNING_RATE
@@ -89,20 +91,21 @@ def training_run(
     print_freq = max(1, num_epochs//20)
 
   for epoch in range(num_epochs):
-    tx, ty = get_batch(train_data)
+    tx, ty = get_batch(train_data, device=device)
 
     _, loss = model(tx, ty)
     optimizer.zero_grad(set_to_none=True)
     if epoch%print_freq == 0:
-      print_loss_estimates(model, train_data, val_data, epoch, num_evals=min(print_freq, 100))
+      print_loss_estimates(model, train_data, val_data, device, epoch, num_evals=min(print_freq, 100))
     loss.backward()
     optimizer.step()
 
 def test_forward_pass(
   model,
-  test_data
+  test_data,
+  device
 ):
-  tx, ty = get_batch(test_data)
+  tx, ty = get_batch(test_data, device=device)
   _, loss = model(tx, ty)
   print(f"Success! Loss = {loss}")
 
