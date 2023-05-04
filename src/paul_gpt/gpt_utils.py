@@ -71,12 +71,15 @@ def text_to_tv_tensors(text, encode, n_chunks=10):
 
   chunk_size = val_cutoff//n_chunks
 
-  train_chunks = [
-    train_text[i*chunk_size:(i+1)*chunk_size] for i in range(n_chunks)
-  ]
+  train_chunks = []
+  for i in range(n_chunks):
+    chunk_text = train_text[i*chunk_size:(i+1)*chunk_size]
+    train_chunks.append(
+      torch.tensor(encode(chunk_text))
+    )
 
   return (
-    [torch.tensor(encode(chunk)) for chunk in train_chunks], 
+    train_chunks, 
     torch.tensor(encode(val_text))
   )
 
