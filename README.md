@@ -16,8 +16,7 @@ End-state goal: a demo-friendly prompt/response GPT chatbot, which is finetuned 
 
 
 ## Detailed, short-term next steps
-* take out Reference sections from wiki articles training corpus?? Other cleanup??
-* better tokenizer??
+* Text corpus improvement ideas? Too many lists in wikipedia (how to fix??); Add dataset of news articles?
 * Multi-head into a 4th dimension??
 
 

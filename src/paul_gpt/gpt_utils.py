@@ -8,7 +8,15 @@ from .hyperparams import (
   LEARNING_RATE,
 )
 
-def get_encoder_decoder_size(text):
+from transformers import AutoTokenizer
+
+def wiki_text_clean(article_text):
+  return article_text.split("\nReferences")[0]
+
+def get_encoder_decoder_size_char(text):
+  """
+  Use character-level encoder
+  """
   vocab = sorted(list(set(text)))
   # print(''.join(vocab))
   vocab_size = len(vocab)
@@ -27,6 +35,31 @@ def get_encoder_decoder_size(text):
   return encode, decode, vocab_size
 
 
+def get_encoder_decoder_size_gpt2(text):
+  """
+  use fast gpt2 tokenizer from hugging face 
+  Tokenizes pieces of words (aka subwords), with 50k vocab size
+
+  Read this for more on :)> tokenizers https://huggingface.co/learn/nlp-course/chapter2/2?fw=pt
+  """
+  tokenizer = AutoTokenizer.from_pretrained("gpt2")
+
+  encode = lambda text: tokenizer(text)['input_ids']
+  
+  return encode, tokenizer.decode, tokenizer.vocab_size
+
+
+
+def get_encoder_decoder_size(
+    text,
+    option = "char"
+):
+  if option == "char":
+    return get_encoder_decoder_size_char(text)
+  elif option == "gpt2":
+    return get_encoder_decoder_size_gpt2(text)
+  else:
+    raise ValueError(f"Option '{option}' not supported for encoder/decoder. Try 'char' for character level, or 'gpt2' for word part tokenizer.")
 
 
 def text_to_tv_tensors(text, encode):
@@ -115,17 +148,20 @@ def test_gen_text(
   encode,
   decode,
   device, 
-  block_size=BLOCK_SIZE
+  block_size=BLOCK_SIZE,
+  n_out_tokens = 500,
 ):
   _ = model.eval()
 
-  if len(seed_raw) < block_size:
-    seed_raw = " "*(block_size - len(seed_raw)) + seed_raw
-  elif len(seed_raw) > block_size:
-    seed_raw = seed_raw[-block_size:]
+  seed_encode = encode(seed_raw)
 
-  seed = torch.tensor(encode(seed_raw)).view(1,-1).to(device)
+  if len(seed_encode) < block_size:
+    seed_encode = encode(" ")*(block_size - len(seed_encode)) + seed_encode
+  elif len(seed_encode) > block_size:
+    seed_encode = seed_encode[-block_size:]
 
-  print(decode(model.generate(seed, 1000)[0,]))
+  seed = torch.tensor(seed_encode).view(1,-1).to(device)
+
+  print(decode(model.generate(seed, n_out_tokens)[0,]))
 
   _ = model.train()
