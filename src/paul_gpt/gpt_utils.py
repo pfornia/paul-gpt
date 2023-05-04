@@ -1,5 +1,6 @@
 import torch
 from statistics import mean
+import random
 
 from .hyperparams import (
   BLOCK_SIZE,
@@ -62,14 +63,22 @@ def get_encoder_decoder_size(
     raise ValueError(f"Option '{option}' not supported for encoder/decoder. Try 'char' for character level, or 'gpt2' for word part tokenizer.")
 
 
-def text_to_tv_tensors(text, encode):
-  data = torch.tensor(encode(text))
+def text_to_tv_tensors(text, encode, n_chunks=10):
+  val_cutoff = int(len(text)*0.9)
 
-  val_cutoff = int(len(data)*0.9)
-  train = data[:val_cutoff]
-  validate = data[val_cutoff:]
+  train_text = text[:val_cutoff]
+  val_text = text[val_cutoff:]
 
-  return train, validate
+  chunk_size = val_cutoff//n_chunks
+
+  train_chunks = [
+    train_text[i*chunk_size:(i+1)*chunk_size] for i in range(n_chunks)
+  ]
+
+  return (
+    [torch.tensor(encode(chunk)) for chunk in train_chunks], 
+    torch.tensor(encode(val_text))
+  )
 
 
 
@@ -107,7 +116,7 @@ def print_loss_estimates(model, train_data, val_data, device, epoch=0, num_evals
 
 def training_run(
   model, 
-  train_data, 
+  train_chunks, 
   val_data,
   device,
   num_epochs=NUM_EPOCHS, 
@@ -124,12 +133,12 @@ def training_run(
     print_freq = max(1, num_epochs//20)
 
   for epoch in range(num_epochs):
-    tx, ty = get_batch(train_data, device=device)
+    tx, ty = get_batch(random.choice(train_chunks), device=device)
 
     _, loss = model(tx, ty)
     optimizer.zero_grad(set_to_none=True)
     if epoch%print_freq == 0:
-      print_loss_estimates(model, train_data, val_data, device, epoch, num_evals=min(print_freq, 100))
+      print_loss_estimates(model, random.choice(train_chunks), val_data, device, epoch, num_evals=min(print_freq, 100))
     loss.backward()
     optimizer.step()
 
