@@ -25,7 +25,7 @@
 # karpathy = 10M
 # karpathy + word parts = 50M
 # this + word parts = 77M
-BATCH_SIZE = 128
+BATCH_SIZE = 16 #64 caused CUDA out of memory
 NUM_EPOCHS = 5000
 LEARNING_RATE = 3e-4
 BLOCK_SIZE = 256 # about 4x the context, since word parts

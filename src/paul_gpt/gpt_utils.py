@@ -148,9 +148,10 @@ def training_run(
 def test_forward_pass(
   model,
   test_data,
-  device
+  device,
+  batch_size=BATCH_SIZE,
 ):
-  tx, ty = get_batch(test_data, device=device)
+  tx, ty = get_batch(test_data, device=device, batch_size=batch_size)
   _, loss = model(tx, ty)
   print(f"Success! Loss = {loss}")
 
