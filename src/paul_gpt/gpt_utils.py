@@ -101,7 +101,14 @@ def get_batch(
 
 #no_grad means don't calculate gradients
 @torch.no_grad()
-def print_loss_estimates(model, train_data, val_data, device, epoch=0, num_evals=100):
+def print_loss_estimates(
+  model, 
+  train_data, 
+  val_data, 
+  device, 
+  epoch=0, 
+  num_evals=100,
+):
   model.eval() #eval mode, e.g., turns off drop out
   #list of X, Y pairs
   train_batches = [get_batch(train_data, device=device) for _ in range(num_evals)]
@@ -124,7 +131,8 @@ def training_run(
   device,
   num_epochs=NUM_EPOCHS, 
   print_freq=None,
-  learning_rate=LEARNING_RATE
+  learning_rate=LEARNING_RATE,
+  batch_size=BATCH_SIZE,
 ):
 
   torch.manual_seed(42)
@@ -136,7 +144,11 @@ def training_run(
     print_freq = max(1, num_epochs//20)
 
   for epoch in range(num_epochs):
-    tx, ty = get_batch(random.choice(train_chunks), device=device)
+    tx, ty = get_batch(
+      random.choice(train_chunks), 
+      device=device, 
+      batch_size=batch_size,
+    )
 
     _, loss = model(tx, ty)
     optimizer.zero_grad(set_to_none=True)

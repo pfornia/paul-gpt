@@ -38,9 +38,9 @@
 # WORD PARTS v2 (5-04 checkpoints)
 # (GPT2 117M, https://d4mucfpksywv.cloudfront.net/better-language-models/language-models.pdf) 
 # This: 163M
-BATCH_SIZE = 16 #64 caused CUDA out of memory
+BATCH_SIZE = 4 #even just 8 caused CUDA out of memory error on the 15GB free GPUs!
 NUM_EPOCHS = 5000
-LEARNING_RATE = 1e-6
+LEARNING_RATE = 3e-7 #trying pretty small LR because my batch size is so small.
 BLOCK_SIZE = 1024
 NUM_BLOCKS = 12
 N_EMB = 768
