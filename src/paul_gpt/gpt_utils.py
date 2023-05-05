@@ -162,7 +162,7 @@ def test_gen_text(
   decode,
   device, 
   block_size=BLOCK_SIZE,
-  n_out_tokens = 500,
+  n_out_tokens = 100,
 ):
   _ = model.eval()
 
