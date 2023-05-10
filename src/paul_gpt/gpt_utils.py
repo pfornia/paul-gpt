@@ -5,7 +5,7 @@ import random
 from .hyperparams import (
   BLOCK_SIZE,
   BATCH_SIZE,
-  NUM_EPOCHS,
+  NUM_BATCHES,
   LEARNING_RATE,
 )
 
@@ -106,7 +106,7 @@ def print_loss_estimates(
   train_data, 
   val_data, 
   device, 
-  epoch=0, 
+  batch=0, 
   num_evals=100,
 ):
   model.eval() #eval mode, e.g., turns off drop out
@@ -122,40 +122,41 @@ def print_loss_estimates(
 
   model.train() #goes back to train mode
 
-  print(f"Epoch: {epoch}, Train Loss: {mean(train_losses):.4f}, Val Loss: {mean(val_losses):.4f}")
+  print(f"Batch: {batch}, Train Loss: {mean(train_losses):.4f}, Val Loss: {mean(val_losses):.4f}")
 
 def training_run(
   model, 
   train_chunks, 
   val_data,
   device,
-  num_epochs=NUM_EPOCHS, 
+  num_batches=NUM_BATCHES, 
   print_freq=None,
   learning_rate=LEARNING_RATE,
   batch_size=BATCH_SIZE,
 ):
 
-  torch.manual_seed(42)
+  # torch.manual_seed(42) #Don't use! Possibly causes repeated pulls of same batches when code is rerun with loaded checkpoint 
 
   optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
-  print(f"Training for {num_epochs} Epochs...")
+  print(f"Training for {num_batches} Batches...")
   if not print_freq:
-    print_freq = max(1, num_epochs//20)
+    print_freq = max(1, num_batches//20)
 
-  for epoch in range(num_epochs):
+  for batch in range(num_batches):
     tx, ty = get_batch(
       random.choice(train_chunks), 
       device=device, 
       batch_size=batch_size,
     )
-
     _, loss = model(tx, ty)
     optimizer.zero_grad(set_to_none=True)
-    if epoch%print_freq == 0:
-      print_loss_estimates(model, random.choice(train_chunks), val_data, device, epoch, num_evals=min(print_freq, 100))
+        
     loss.backward()
     optimizer.step()
+
+    if batch%print_freq == 0 or batch == num_batches-1: #print at intervals, and at the end.
+      print_loss_estimates(model, random.choice(train_chunks), val_data, device, batch, num_evals=min(print_freq, 100))
 
 def test_forward_pass(
   model,

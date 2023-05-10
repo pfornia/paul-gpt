@@ -16,7 +16,8 @@ End-state goal: a demo-friendly prompt/response GPT chatbot, which is finetuned 
 
 
 ## Detailed, short-term next steps
-* Presentation for friday!
+* More easily experiment with hyperparams without building and pushing.
+* Train my own tokenizer on simple wiki? This would reduce unhelpful tokens, e.g., those used in prgrogramming languages.
 * Supervised fine tuning?? Good public Q&A data sets?
 * RLHF
 * Text corpus improvement ideas? Too many lists in wikipedia (how to fix??); Add dataset of news articles?
