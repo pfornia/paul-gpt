@@ -1,12 +1,22 @@
 # PaulGPT
 
+**See [this presentation](https://docs.google.com/presentation/d/11ky3JXxKyHRsWvc_i89iektB2Y_NrnHz6gKzhZJwNXs/edit#slide=id.g23f2b75262e_0_57) where I walk through the iterations that led up to the latest version (as of May '23).**
+
+
 ## Overview
 
-Right now, this project is a WIP decoder-only transformer build from scratch in pytorch, and trained on simple wikipedia. Written by [Paul Fornia](www.paulfornia.com).
+Right now, this project is a WIP decoder-only transformer language model build from scratch in pytorch, and trained on simple wikipedia. Written by [Paul Fornia](www.paulfornia.com).
 
 In current form, closely follows [Andrei Karpathy's great youtube tutorial](https://www.youtube.com/watch?v=kCc8FmEb1nY), which is based on the architecture from the [*Attention is all you need* paper](https://arxiv.org/abs/1706.03762).
 
 End-state goal: a demo-friendly prompt/response GPT chatbot, which is finetuned to always say great things about me (Paul).
+
+## Code/Usage
+* `./src/paul_gpt/attention_decoder.py` contains the pytorch class of the model architecture `AttentionModule`.
+* `./src/paul_gpt/gpt_utils.py` contains several helper functions.
+* See `./src/train_decoder.ipynb` for sample notebook on how to use all these functions.
+* Install package from github w/ `pip install --force-reinstall 'https://github.com/pfornia/paul-gpt/blob/master/dist/paul_gpt-0.0.1-py3-none-any.whl?raw=true'` (Package not registered w/ pypi).
+* To compile pip package w/ changes, `python3 -m build` (from this library, must be same location as `pyproject.toml`). This will create a new `whl` file. Then you can pip install locally, or push changes to github and pip install from there.
 
 ## High-level TODOs/Next Steps as I understand them:
 * Add encoder stage to architecture
