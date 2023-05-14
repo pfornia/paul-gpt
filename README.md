@@ -1,11 +1,11 @@
 # PaulGPT
 
-**See [this presentation](https://docs.google.com/presentation/d/11ky3JXxKyHRsWvc_i89iektB2Y_NrnHz6gKzhZJwNXs/edit#slide=id.g23f2b75262e_0_57) where I walk through the iterations that led up to the latest version (as of May '23).**
+**See [this presentation](https://docs.google.com/presentation/d/11ky3JXxKyHRsWvc_i89iektB2Y_NrnHz6gKzhZJwNXs/view#slide=id.p) where I walk through the iterations that led up to the latest version (as of May '23).**
 
 
 ## Overview
 
-Right now, this project is a WIP decoder-only transformer language model build from scratch in pytorch, and trained on simple wikipedia. Written by [Paul Fornia](www.paulfornia.com).
+Right now, this project is a WIP decoder-only transformer language model build from scratch in pytorch, and trained on simple wikipedia. Written by [Paul Fornia](https://www.paulfornia.com).
 
 In current form, closely follows [Andrei Karpathy's great youtube tutorial](https://www.youtube.com/watch?v=kCc8FmEb1nY), which is based on the architecture from the [*Attention is all you need* paper](https://arxiv.org/abs/1706.03762).
 
